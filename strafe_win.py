@@ -18,7 +18,7 @@ class TkinterThread(threading.Thread):
         root.title("Strafe")
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
-        font = "Times New Roman"
+        font = "Source Code Pro"
         root.geometry("300x160")
         root.resizable(width=True, height=True)
 
