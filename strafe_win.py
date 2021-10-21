@@ -8,6 +8,7 @@ import tkinter as tk
 import threading
 import win32gui
 import win32con
+import win32process
 
 state_name = "state.txt"
 if getattr(sys, 'frozen', False):
@@ -23,6 +24,7 @@ class TkinterThread(threading.Thread):
         self.name = name
         self.counter = counter
         self.dark_mode = True
+        self.auto_save = None
 
     def run(self):
         img = \
@@ -65,7 +67,6 @@ class TkinterThread(threading.Thread):
 
         text_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
-        #dark mode
         if(self.dark_mode):
             text_area.config(background="#1D1F21",
                             foreground="white",
@@ -75,21 +76,24 @@ class TkinterThread(threading.Thread):
                             highlightbackground = 'gray20',
                             highlightcolor      = 'gray10',)
 
-        thread3 = AutoSaveThread(3, "Thread-3", 3, text_area)
         try:
             with open(state_path, "r") as state:
                 lines = state.readlines()
                 for line in lines:
-                    print("Now inserting line: " + line)
                     text_area.insert(tk.INSERT, line)
         except FileNotFoundError:
             text_area.insert(tk.INSERT, "")
-
+        self.auto_save = AutoSaveThread(3, "Thread-3", 3, root, text_area)
+        self.auto_save.start()
         text_area.focus()
         root.lift()
-        thread3.start()
+        root.protocol("WM_DELETE_WINDOW", lambda root=root: self.on_closing(root))
 
         tk.mainloop()
+
+    def on_closing(self, root):
+        self.auto_save.finish()
+        root.destroy()
 
 class FocusWindowThread(threading.Thread):
     def __init__(self, threadID, name, counter):
@@ -111,30 +115,42 @@ class FocusWindowThread(threading.Thread):
         win32gui.SetWindowPos(hwnd, win32con.HWND_TOPMOST, x, y, w, h, 0)
 
 class AutoSaveThread(threading.Thread):
-    def __init__(self, threadID, name, counter, text_area):
+    def __init__(self, threadID, name, counter, root, text_area):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
         self.counter = counter
         self.text_area = text_area
         self.first_pass = True
+        self.root = root
+        self.cont = True
+
+    def finish(self):
+        self.cont = False
 
     def run(self):
-        while True: 
+        while self.cont:
             if(not self.first_pass):
                 with open(state_path, "w") as f:
                     state = self.text_area.get("1.0", tk.END).rstrip("\n")
-                    print("Now writing line: " + state)
                     f.write(state)
             else:
                 self.first_pass = False
             # autosave every 10 seconds
-            time.sleep(10)
+            time.sleep(1)
+
+def find_existing_strafe():
+    hwnd = win32gui.FindWindow(None, 'Strafe')
+    if hwnd == 0:
+        return False
+    return True
 
 
 if __name__ == "__main__":
-    thread1 = TkinterThread(1, "Thread-1", 1)
-    thread2 = FocusWindowThread(2, "Thread-2", 2)
-    thread1.start()
-    time.sleep(1)
-    thread2.start()
+    existing_strafe = find_existing_strafe()
+    if not existing_strafe:
+        thread1 = TkinterThread(1, "Thread-1", 1)
+        thread2 = FocusWindowThread(2, "Thread-2", 2)
+        thread1.start()
+        time.sleep(1)
+        thread2.start()
