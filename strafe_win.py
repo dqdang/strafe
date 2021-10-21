@@ -82,12 +82,16 @@ class AutoSaveThread(threading.Thread):
         self.name = name
         self.counter = counter
         self.text_area = text_area
+        self.first_pass = True
 
     def run(self):
         while True: 
             with open(state_path, "w") as f:
-                state = self.text_area.get("1.0", tk.END)
-                f.write(state)
+                state = self.text_area.get("1.0", tk.END).rstrip("\n")
+                if(not self.first_pass):
+                    f.write(state)
+                else:
+                    self.first_pass = False
             # autosave every 10 seconds
             time.sleep(10)
 
