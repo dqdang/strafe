@@ -135,3 +135,5 @@ state.txt
 *.DS_Store
 
 strafe/strafe.xcodeproj/project.xcworkspace/xcuserdata/
+strafe/strafe/.DS_Store
+
