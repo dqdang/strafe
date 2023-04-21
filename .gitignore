@@ -133,3 +133,5 @@ dmypy.json
 state.txt
 
 .DS_Store
+
+strafe/strafe.xcodeproj/project.xcworkspace/xcuserdata/
