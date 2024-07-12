@@ -11,14 +11,17 @@ import CoreData
 
 struct ContentView: View {
     @State private var text = ""
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         NavigationStack {
             Text("")
-            TextEditor(text: $text).padding(.horizontal)
+            TextEditor(text: $text).focused($isFocused).padding(.horizontal)
             }.onTapGesture {
                 self.endEditing()
-        }
+            }.onAppear {
+                isFocused = true
+            }
     }
     private func endEditing() {
         UIApplication.shared.endEditing()
