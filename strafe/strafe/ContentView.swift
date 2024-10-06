@@ -21,7 +21,7 @@ struct ContentView: View {
                 self.endEditing()
             }.onAppear {
                 isFocused = true
-            }
+            }.accentColor(.blue)
     }
     private func endEditing() {
         UIApplication.shared.endEditing()
