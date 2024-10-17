@@ -8,7 +8,6 @@
 import SwiftUI
 import CoreData
 
-
 struct ContentView: View {
     @State private var text = ""
     @FocusState private var isFocused: Bool
@@ -28,17 +27,20 @@ struct ContentView: View {
     }
 }
 
+
 extension UIApplication {
     func endEditing() {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
+
 extension UIScreen{
     static let screenWidth = UIScreen.main.bounds.size.width
     static let screenHeight = UIScreen.main.bounds.size.height
     static let screenSize = UIScreen.main.bounds.size
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
