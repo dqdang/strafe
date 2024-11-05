@@ -10,6 +10,8 @@ import win32gui
 import win32con
 import win32process
 
+stop_threads = False
+
 state_name = "state.txt"
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -124,20 +126,28 @@ class AutoSaveThread(threading.Thread):
         self.first_pass = True
         self.root = root
         self.cont = True
+        self.root.bind('<Control-s>', self.save_file)
+
+    def save_file(self, event=None):
+        with open(state_path, "w") as f:
+            state = self.text_area.get("1.0", tk.END).rstrip("\n")
+            f.write(state)
 
     def finish(self):
         self.cont = False
 
     def run(self):
+        sec = 0
         while self.cont:
-            if(not self.first_pass):
+            # autosave every 10 seconds
+            if(not self.first_pass) and sec % 10 == 0:
                 with open(state_path, "w") as f:
                     state = self.text_area.get("1.0", tk.END).rstrip("\n")
                     f.write(state)
             else:
                 self.first_pass = False
-            # autosave every 10 seconds
             time.sleep(1)
+            sec += 1
 
 def find_existing_strafe():
     hwnd = win32gui.FindWindow(None, 'Strafe')
